@@ -5,7 +5,7 @@ on:
     branches: [ "main" ]  # Активируется при пуше в main ветку
   pull_request:            # Опционально: сборка при PR
     branches: [ "main" ]
-  workflow_dispatch:
+  workflow_dispatch: true
 
 env:
   REGISTRY: docker.io
