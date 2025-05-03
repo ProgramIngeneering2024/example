@@ -6,9 +6,9 @@ from bottle import route, run
 #    return 'HEALTHY\n'
 
 
-@route('/ready')
-def index():
-    return 'READY\n'
+#@route('/ready')
+#def index():
+#    return 'READY\n'
 
 
 @route('/')
