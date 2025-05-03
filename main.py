@@ -3,16 +3,16 @@ from bottle import route, run
 
 @route('/health')
 def index():
-    return 'HEALTHY'
+    return 'HEALTHY\n'
 
 
 @route('/ready')
 def index():
-    return 'READY'
+    return 'READY\n'
 
 
 @route('/')
 def index():
-    return '<b>Hello World! at 10:49:27</b>!'
+    return '<b>Hello World! at 10:23:35</b>!\n'
 
 run(host='0.0.0.0', port=8080)
