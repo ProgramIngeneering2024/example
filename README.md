@@ -1,2 +1,2 @@
 # example
-docker push remzalp/bottle-app:tagname
+docker push remzalp/bottle-app:latest
