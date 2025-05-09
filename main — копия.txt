@@ -11,7 +11,7 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 
 # Получаем адрес экспортера трейсов из переменной окружения
-otel_exporter_endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "localhost:4317")
+otel_exporter_endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "localhost:14250")
 
 # Настройка OpenTelemetry
 span_exporter = OTLPSpanExporter(endpoint=otel_exporter_endpoint, insecure=True)
