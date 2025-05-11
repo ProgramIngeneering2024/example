@@ -1,5 +1,2 @@
 flask
 prometheus_client
-opentelemetry-api
-opentelemetry-sdk
-opentelemetry-exporter-otlp

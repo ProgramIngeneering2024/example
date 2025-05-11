@@ -1,6 +1,6 @@
-FROM python:3.10
+FROM python:3.10-slim
 WORKDIR /app
 COPY . /app
 RUN pip install -r requirements.txt
-EXPOSE 80
+EXPOSE 5000
 CMD [ "python", "main.py" ]

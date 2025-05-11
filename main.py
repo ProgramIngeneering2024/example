@@ -1,73 +1,20 @@
-from flask import Flask, jsonify
-import logging
-import os
-from prometheus_client import Counter, Gauge, generate_latest, CONTENT_TYPE_LATEST
-
-# OpenTelemetry imports
-from opentelemetry import trace
-from opentelemetry.sdk.resources import Resource
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-
-# Получаем адрес экспортера трейсов из переменной окружения
-otel_exporter_endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "localhost:4317")
-
-# Настройка OpenTelemetry
-span_exporter = OTLPSpanExporter(endpoint=otel_exporter_endpoint, insecure=True)
-span_processor = BatchSpanProcessor(span_exporter)
-trace_provider = TracerProvider(
-    resource=Resource.create({
-        "service.name": "my-test-app"
-    })
-)
-trace.set_tracer_provider(trace_provider)
-tracer = trace.get_tracer(__name__)
-
-trace_provider.add_span_processor(span_processor)
+from flask import Flask
+from prometheus_client import make_wsgi_app, Counter, generate_latest
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
 app = Flask(__name__)
+requests_counter = Counter('http_requests_total', 'Total HTTP Requests')
 
-# Настройка логирования
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s %(levelname)s: %(message)s',
-    handlers=[
-        logging.FileHandler('app.log'),
-        logging.StreamHandler()
-    ]
-)
+# Основное приложение
+@app.route('/')
+def hello():
+    requests_counter.inc()
+    return "Hello World!"
 
-# Настройка Prometheus
-REQUEST_COUNT = Counter('app_requests_total', 'Total number of requests')
-REQUEST_LATENCY = Gauge('app_request_latency_seconds', 'Request latency in seconds')
-
-# Эндпоинт для startup
-@app.route('/startup', methods=['GET'])
-def startup():
-    logging.info('Startup endpoint called')
-    return jsonify({'status': 'OK'})
-
-# Эндпоинт для health probe
-@app.route('/healthz', methods=['GET'])
-def healthz():
-    logging.info('Health probe endpoint called')
-    return jsonify({'status': 'OK'})
-
-# Эндпоинт для Prometheus метрик
-@app.route('/metrics', methods=['GET'])
-def metrics():
-    return generate_latest(), 200, {'Content-Type': CONTENT_TYPE_LATEST}
-
-# Основной эндпоинт
-@app.route('/', methods=['GET'])
-def index():
-    with tracer.start_as_current_span("request"):
-        REQUEST_COUNT.inc()
-        with REQUEST_LATENCY.time():
-            logging.info('Main endpoint called')
-            return jsonify({'message': 'Hello, World!'})
+# Метрики Prometheus
+app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
+    '/metrics': make_wsgi_app()
+})
 
 if __name__ == '__main__':
-    port = 80
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=5000)
